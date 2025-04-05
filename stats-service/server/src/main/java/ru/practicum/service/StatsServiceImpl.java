@@ -21,9 +21,18 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<ViewStats> getViewStats(Timestamp start, Timestamp end, List<String> uris, boolean unique) {
-        if (unique) {
-            repo.findStatsByDatesUniqueIp(start, end, uris);
+        if (uris == null || uris.isEmpty()) {
+            if (unique) {
+                return repo.findStatsByDatesUniqueIpAllUris(start, end);
+            } else {
+                return repo.findStatsByDatesAllUris(start, end);
+            }
+        } else {
+            if (unique) {
+                return repo.findStatsByDatesUniqueIp(start, end, uris);
+            } else {
+                return repo.findStatsByDates(start, end, uris);
+            }
         }
-        return repo.findStatsByDates(start, end, uris);
     }
 }

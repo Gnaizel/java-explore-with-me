@@ -37,7 +37,7 @@ public class StatsController {
     public List<ViewStatsResponseDto> stats(
             @RequestParam Timestamp start,
             @RequestParam Timestamp end,
-            @RequestParam List<String> uris,
+            @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
         log.info("start: {}, end: {}", start, end);
