@@ -12,29 +12,28 @@ logging:
 spring:
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update #update | none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   sql:
     init:
-      mode: always
+      mode: never  #always | never
 
   datasource:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/stat
+    url: jdbc:postgresql://stats-db:5432/stat #jdbc:postgresql://stats-db:5432/stat | jdbc:postgresql://localhost:4321/stat
     username: postgres
     password: postgres
 
 ---
 
-spring:
-  config:
-    activate:
-      on-profile: "ci,test" # Или ["ci", "test"] - зависит от версии Spring Boot
-  datasource:
-    driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:stats-server
-    username: test
-    password: test
+#spring:
+#  config:
+#    activate:
+#      on-profile: "ci,test"
+#  datasource:
+#    driverClassName: org.h2.Driver
+#    url: jdbc:h2:mem:stats-server
+#    username: test
+#    password: test
