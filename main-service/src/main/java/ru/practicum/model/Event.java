@@ -21,7 +21,7 @@ public class Event {
     @Transient
     private final String datePattern = DATE;
     @Transient
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(datePattern);
+    private final DateTimeFormatter formater = DateTimeFormatter.ofPattern(datePattern);
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

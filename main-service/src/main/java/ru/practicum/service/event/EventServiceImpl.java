@@ -12,8 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.ViewStatsResponseDto;
 import ru.practicum.dto.event.*;
+import ru.practicum.enums.EventStat;
 import ru.practicum.enums.SortValue;
-import ru.practicum.exceptions.*;
+import ru.practicum.enums.StatForUser;
+import ru.practicum.exception.*;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
@@ -21,14 +23,12 @@ import ru.practicum.model.User;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.UserRepository;
-import ru.practicum.service.statistics.StatisticsService;
+import ru.practicum.service.statistic.StatisticsService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.springframework.http.HttpHeaders.DATE;
 
 
 @Service
@@ -37,11 +37,12 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepo;
     private final CategoryRepository categoryRepo;
     private final EventMapper eventMapper;
+
     private final UserRepository userRepo;
+
     private final EntityManager entityManager;
     private final StatisticsService statsService;
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE);
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public EventFullDto createEvent(Long userId, EventCreateDto newEvent) {
@@ -97,7 +98,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, EventState states, List<Long> categoryIds,
+    public List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, EventStat states, List<Long> categoriesId,
                                                          String rangeStart, String rangeEnd, Integer from, Integer size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
@@ -105,7 +106,7 @@ public class EventServiceImpl implements EventService {
 
         List<Predicate> predicates = new ArrayList<>();
         if (users != null && !users.isEmpty()) predicates.add(root.get("initiator").in(users));
-        if (categoryIds != null && !categoryIds.isEmpty()) predicates.add(root.get("category").in(categoryIds));
+        if (categoriesId != null && !categoriesId.isEmpty()) predicates.add(root.get("category").in(categoriesId));
         if (states != null) predicates.add(root.get("state").in(states));
 
         if (rangeStart != null)
@@ -239,32 +240,32 @@ public class EventServiceImpl implements EventService {
         Optional.ofNullable(dto.getTitle()).ifPresent(event::setTitle);
 
         if (dto.getStateAction() != null) {
-            if (dto.getStateAction() == StateActionForUser.SEND_TO_REVIEW) {
-                event.setState(EventState.PENDING);
+            if (dto.getStateAction() == StatForUser.SEND_TO_REVIEW) {
+                event.setState(EventStat.PENDING);
             } else {
-                event.setState(EventState.CANCELED);
+                event.setState(EventStat.CANCELED);
             }
         }
     }
 
     private void validateAndPublish(Event event) {
         if (event.getPublishedOn() != null) throw new AlreadyPublishedException("Event already published");
-        if (event.getState() == EventState.CANCELED) throw new EventAlreadyCanceledException("Event is canceled");
+        if (event.getState() == EventStat.CANCELED) throw new EventAlreadyCanceledException("Event is canceled");
         event.setPublishedOn(LocalDateTime.now());
-        event.setState(EventState.PUBLISHED);
+        event.setState(EventStat.PUBLISHED);
     }
 
     private void rejectEvent(Event event) {
         if (event.getPublishedOn() != null) throw new AlreadyPublishedException("Event already published");
-        event.setState(EventState.CANCELED);
+        event.setState(EventStat.CANCELED);
     }
 
     private void assignViewCounts(List<Event> events) {
         if (events.isEmpty()) return;
 
         LocalDateTime latestStart = events.stream().map(Event::getCreatedOn).max(LocalDateTime::compareTo).orElse(LocalDateTime.now());
-        String startTime = latestStart.format(DateTimeFormatter.ofPattern(DATE));
-        String endTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE));
+        String startTime = latestStart.format(formatter);
+        String endTime = LocalDateTime.now().format(formatter);
 
         Map<String, Event> uriToEventMap = new HashMap<>();
         List<String> uris = new ArrayList<>();
