@@ -50,7 +50,7 @@ public class StatsClient {
         try {
             return Arrays.asList(objectMapper.readValue(response.getBody(), ViewStatsResponseDto[].class));
         } catch (JsonProcessingException exception) {
-            throw new StatsException(String.format("Json processing error: %s", exception.getMessage()));
+            throw new RuntimeException(String.format("Json processing error: %s", exception.getMessage()));
         }
     }
 }

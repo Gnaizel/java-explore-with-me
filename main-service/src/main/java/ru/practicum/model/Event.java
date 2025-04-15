@@ -15,6 +15,7 @@ import static org.springframework.http.HttpHeaders.DATE;
 @Entity
 @Data
 @Builder
+@Table(name = "events")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {
@@ -29,7 +30,7 @@ public class Event {
     @OneToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
-    private int confirmedRequests;
+    private long confirmedRequests;
     @Column(name = "created_On")
     private LocalDateTime createdOn;
     private String description;

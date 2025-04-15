@@ -13,6 +13,7 @@ import ru.practicum.dto.compilation.CompilationCreateDto;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationUpdateDto;
 import ru.practicum.exception.CompilationNotExistException;
+import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 import ru.practicum.repository.CompilationRepository;
@@ -49,14 +50,14 @@ public class CompilationServiceImpl implements CompilationService {
         return mapper.mapToCompilationDto(savedCompilation);
     }
 
-    public CompilationDto getCompilation(Long compId) {
+    public CompilationDto getCompilation(long compId) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new CompilationNotExistException("Compilation doesn't exist"));
         return mapper.mapToCompilationDto(compilation);
     }
 
     @Override
-    public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
+    public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Compilation> query = builder.createQuery(Compilation.class);
 
@@ -116,5 +117,4 @@ public class CompilationServiceImpl implements CompilationService {
             eventService.setView(events);
         }
     }
-}
 }
