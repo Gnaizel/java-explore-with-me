@@ -124,7 +124,7 @@ public class EventServiceImpl implements EventService {
         if (events.isEmpty()) return Collections.emptyList();
 
         assignViewCounts(events);
-        return eventMapper.toEventFullDtoList(events);
+        return events.stream().map(eventMapper::toEventFullDto).toList();
     }
 
     @Override
@@ -173,7 +173,7 @@ public class EventServiceImpl implements EventService {
         assignViewCounts(events);
         statsService.sendStat(events, request);
 
-        return eventMapper.toEventFullDtoList(events);
+        return events.stream().map(eventMapper::toEventFullDto).toList();
     }
 
     @Override

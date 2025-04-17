@@ -27,7 +27,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String annotation;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
     private long confirmedRequests;
