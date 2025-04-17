@@ -10,8 +10,6 @@ import ru.practicum.enums.EventStat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static org.springframework.http.HttpHeaders.DATE;
-
 @Entity
 @Data
 @Builder
@@ -20,7 +18,7 @@ import static org.springframework.http.HttpHeaders.DATE;
 @AllArgsConstructor
 public class Event {
     @Transient
-    private final String datePattern = DATE;
+    private final String datePattern = "yyyy-MM-dd HH:mm:ss";
     @Transient
     private final DateTimeFormatter formater = DateTimeFormatter.ofPattern(datePattern);
     @Id
