@@ -17,7 +17,7 @@ spring:
         jdbc:
           time_zone: UTC
   datasource:
-    url: jdbc:postgresql://ewm-db:5432/ewm-service
+    url: jdbc:postgresql://ewm-db:5432/ewm-service #jdbc:postgresql://localhost:6543/ewm-service
     username: postgres
     password: postgres
   sql:
