@@ -4,6 +4,13 @@ server:
 stats-server:
   url: http://stats-server:9090
 
+logging:
+  level:
+    root: INFO
+    ru.practicum: INFO
+    sun.rmi: INFO
+    javax.management: INFO
+
 spring:
   jpa:
     hibernate:

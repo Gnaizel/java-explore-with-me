@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.NameAlreadyExistException;
 import ru.practicum.mapper.UserMapper;
+import ru.practicum.model.User;
 import ru.practicum.repository.UserRepository;
 
 import java.util.List;
@@ -25,13 +26,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        log.debug("[JSON] - UserDto: \n name: {} \n email: {}", userDto.getName(), userDto.getEmail());
         if (userRepository.existsByName(userDto.getName())) {
             log.warn(String.format("Can't create user with name: %s, the name was used by another user", userDto.getName()));
             throw new NameAlreadyExistException(String.format("Can't create user with name: %s, the name was used by another user",
                     userDto.getName()));
         }
         log.debug(String.format("The user with name %s was created", userDto.getName()));
-        return userMapper.toUserDto(userRepository.save(userMapper.toUserModel(userDto)));
+        User saveUser = userMapper.toUserModel(userDto);
+        log.debug("saveUser after UserMapper: \n name: {} \n email: {}", saveUser.getName(), saveUser.getEmail());
+        return userMapper.toUserDto(userRepository.save(saveUser));
     }
 
     @Override
