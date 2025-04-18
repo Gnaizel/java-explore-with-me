@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.enums.QuesStat;
+import ru.practicum.enums.RequestStatus;
 
 import java.time.LocalDateTime;
 
@@ -23,5 +23,5 @@ public class Request {
     private Long event;
     private Long requester;
     @Enumerated(EnumType.STRING)
-    private QuesStat status;
+    private RequestStatus status;
 }

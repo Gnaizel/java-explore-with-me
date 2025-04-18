@@ -16,6 +16,7 @@ public class PublicEventsController {
 
     private final EventService eventService;
 
+    @GetMapping
     public List<EventFullDto> getEventsWithParamsByUser(@RequestParam(name = "text", required = false) String text,
                                                         @RequestParam(name = "categories", required = false) List<Long> categories,
                                                         @RequestParam(name = "paid", required = false) Boolean paid,
