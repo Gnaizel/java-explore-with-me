@@ -105,8 +105,8 @@ public class EventServiceImpl implements EventService {
         Root<Event> root = query.from(Event.class);
 
         List<Predicate> predicates = new ArrayList<>();
-        if (users != null && !users.isEmpty()) predicates.add(root.get("initiator").in(users));
-        if (categoriesId != null && !categoriesId.isEmpty()) predicates.add(root.get("category").in(categoriesId));
+        if (users != null && !users.isEmpty()) predicates.add(root.get("initiator").get("id").in(users));
+        if (categoriesId != null && !categoriesId.isEmpty()) predicates.add(root.get("category").get("id").in(categoriesId));
         if (states != null) predicates.add(root.get("state").in(states));
 
         if (rangeStart != null)
@@ -143,7 +143,7 @@ public class EventServiceImpl implements EventService {
                     cb.like(cb.lower(root.get("description")), likeText)));
         }
 
-        if (categoryIds != null && !categoryIds.isEmpty()) filters.add(root.get("category").in(categoryIds));
+        if (categoryIds != null && !categoryIds.isEmpty()) filters.add(root.get("category").get("id").in(categoryIds));
         if (paid != null) filters.add(paid ? cb.isTrue(root.get("paid")) : cb.isFalse(root.get("paid")));
 
         if (rangeStart != null)
