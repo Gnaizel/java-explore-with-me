@@ -18,6 +18,7 @@ import ru.practicum.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,7 +65,14 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     @Override
     public RequestStatusUpdateResult updateRequests(Long userId, Long eventId, RequestStatusUpdateDto requestStatusUpdateDto) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotExistException("Event doesn't exist"));
+        if (requestStatusUpdateDto.getRequestIds() == null
+                || requestStatusUpdateDto.getRequestIds().stream().anyMatch(Objects::isNull)) {
+            throw new InvalidRequestException("Request IDs cannot be null");
+        }
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotExistException("Event doesn't exist"));
+
         RequestStatusUpdateResult result = new RequestStatusUpdateResult();
 
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
@@ -72,33 +80,42 @@ public class RequestServiceImpl implements RequestService {
         }
 
         List<Request> requests = requestRepository.findAllByEventWithInitiator(userId, eventId);
-        List<Request> requestsToUpdate = requests.stream().filter(x -> requestStatusUpdateDto.getRequestIds().contains(x.getId())).collect(Collectors.toList());
 
-        if (requestsToUpdate.stream().anyMatch(x -> x.getStatus().equals(RequestStatus.CONFIRMED) && requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.REJECTED))) {
-            throw new RequestAlreadyConfirmedException("request already confirmed");
+        List<Request> requestsToUpdate = requests.stream()
+                .filter(x -> requestStatusUpdateDto.getRequestIds().contains(x.getId()))
+                .collect(Collectors.toList());
+
+        if (requestsToUpdate.isEmpty()) {
+            throw new InvalidRequestException("No valid requests found");
         }
 
-        if (event.getConfirmedRequests() + requestsToUpdate.size() > event.getParticipantLimit() && requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.CONFIRMED)) {
-            throw new ParticipantLimitException("exceeding the limit of participants");
+        if (requestStatusUpdateDto.getStatus() == RequestStatusToUpdate.REJECTED) {
+            requestsToUpdate.forEach(request -> {
+                if (request.getStatus() == RequestStatus.CONFIRMED) {
+                    throw new RequestAlreadyConfirmedException(
+                            "Cannot reject already confirmed request ID: " + request.getId());
+                }
+            });
         }
 
-        for (Request x : requestsToUpdate) {
-            x.setStatus(RequestStatus.valueOf(requestStatusUpdateDto.getStatus().toString()));
+        if (requestStatusUpdateDto.getStatus() == RequestStatusToUpdate.CONFIRMED) {
+            long availableSlots = event.getParticipantLimit() - event.getConfirmedRequests();
+            if (availableSlots < requestsToUpdate.size()) {
+                throw new ParticipantLimitException(
+                        "Only " + availableSlots + " slots available");
+            }
         }
+
+        requestsToUpdate.forEach(request ->
+                request.setStatus(RequestStatus.valueOf(requestStatusUpdateDto.getStatus().name())));
 
         requestRepository.saveAll(requestsToUpdate);
 
-        if (requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.CONFIRMED)) {
+        if (requestStatusUpdateDto.getStatus() == RequestStatusToUpdate.CONFIRMED) {
             event.setConfirmedRequests(event.getConfirmedRequests() + requestsToUpdate.size());
-        }
-
-        eventRepository.save(event);
-
-        if (requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.CONFIRMED)) {
+            eventRepository.save(event);
             result.setConfirmedRequests(requestMapper.toRequestDtoList(requestsToUpdate));
-        }
-
-        if (requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.REJECTED)) {
+        } else {
             result.setRejectedRequests(requestMapper.toRequestDtoList(requestsToUpdate));
         }
 
