@@ -62,6 +62,50 @@ public class RequestServiceImpl implements RequestService {
         return requestMapper.toRequestDto(requestRepository.save(request));
     }
 
+//    @Transactional
+//    @Override
+//    public RequestStatusUpdateResult updateRequests(Long userId, Long eventId, RequestStatusUpdateDto requestStatusUpdateDto) {
+//        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotExistException("Event doesn't exist"));
+//        RequestStatusUpdateResult result = new RequestStatusUpdateResult();
+//
+//        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+//            return result;
+//        }
+//
+//        List<Request> requests = requestRepository.findAllByEventWithInitiator(userId, eventId);
+//        List<Request> requestsToUpdate = requests.stream().filter(x -> requestStatusUpdateDto.getRequestIds().contains(x.getId())).collect(Collectors.toList());
+//
+//        if (requestsToUpdate.stream().anyMatch(x -> x.getStatus().equals(RequestStatus.CONFIRMED) && requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.REJECTED))) {
+//            throw new RequestAlreadyConfirmedException("request already confirmed");
+//        }
+//
+//        if (event.getConfirmedRequests() + requestsToUpdate.size() > event.getParticipantLimit() && requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.CONFIRMED)) {
+//            throw new ParticipantLimitException("exceeding the limit of participants");
+//        }
+//
+//        for (Request x : requestsToUpdate) {
+//            x.setStatus(RequestStatus.valueOf(requestStatusUpdateDto.getStatus().toString()));
+//        }
+//
+//        requestRepository.saveAll(requestsToUpdate);
+//
+//        if (requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.CONFIRMED)) {
+//            event.setConfirmedRequests(event.getConfirmedRequests() + requestsToUpdate.size());
+//        }
+//
+//        eventRepository.save(event);
+//
+//        if (requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.CONFIRMED)) {
+//            result.setConfirmedRequests(requestMapper.toRequestDtoList(requestsToUpdate));
+//        }
+//
+//        if (requestStatusUpdateDto.getStatus().equals(RequestStatusToUpdate.REJECTED)) {
+//            result.setRejectedRequests(requestMapper.toRequestDtoList(requestsToUpdate));
+//        }
+//
+//        return result;
+//    }
+
     @Transactional
     @Override
     public RequestStatusUpdateResult updateRequests(Long userId, Long eventId, RequestStatusUpdateDto requestStatusUpdateDto) {

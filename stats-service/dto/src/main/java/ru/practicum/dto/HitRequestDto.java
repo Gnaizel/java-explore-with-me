@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -17,8 +17,8 @@ public class HitRequestDto {
     private Long id;
     @NotBlank
     private String app;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Timestamp timestamp;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") // формат с часовым поясом
+    private OffsetDateTime timestamp;
     @NotBlank
     private String uri;
     @NotBlank

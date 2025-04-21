@@ -2,6 +2,7 @@ package ru.practicum;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class StatsClient {
     private final String serverUrl;
@@ -29,6 +31,7 @@ public class StatsClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<HitRequestDto> requestEntity = new HttpEntity<>(endpointHitDto, headers);
+        log.debug(requestEntity.getBody().toString());
         restTemplate.exchange(serverUrl + "/hit", HttpMethod.POST, requestEntity, HitRequestDto.class);
     }
 

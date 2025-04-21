@@ -16,7 +16,7 @@ public class StatsMapper {
         HitBody hitBody = HitBody.builder()
                 .app(request.getApp())
                 .ip(request.getIp())
-                .timestamp(request.getTimestamp())
+                .timestamp(java.sql.Timestamp.valueOf(request.getTimestamp().toLocalDateTime()))
                 .uri(request.getUri())
                 .build();
         return hitBody;

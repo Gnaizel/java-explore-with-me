@@ -2,87 +2,105 @@ package ru.practicum.service.statistic;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.StatsClient;
 import ru.practicum.dto.HitRequestDto;
 import ru.practicum.dto.ViewStatsResponseDto;
 import ru.practicum.model.Event;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
     private final StatsClient statsClient;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final LocalDateTime now = LocalDateTime.now();
+    private final String nameService = "main-service";
 
     @Override
     public void sendStat(Event event, HttpServletRequest request) {
+        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
         String remoteAddr = request.getRemoteAddr();
-        String nameService = "main-service";
-        HitRequestDto requestDto = new HitRequestDto();
-        requestDto.setTimestamp(Timestamp.valueOf(now.format(formatter)));
-        requestDto.setUri("/events");
-//        requestDto.setApp(nameService);
-        requestDto.setIp(remoteAddr);
+
+        HitRequestDto requestDto = HitRequestDto.builder()
+                .timestamp(currentTime)
+                .app(nameService)
+                .uri("/events")
+                .ip(remoteAddr)
+                .build();
+
         statsClient.createHit(requestDto);
-        sendStatForTheEvent(event.getId(), remoteAddr, now, nameService);
+        sendStatForTheEvent(event.getId(), remoteAddr, currentTime, "main-service");
     }
 
     @Override
     public void sendStat(List<Event> events, HttpServletRequest request) {
+        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
         String remoteAddr = request.getRemoteAddr();
-        String nameService = "main-service";
-        HitRequestDto requestDto = new HitRequestDto();
-        requestDto.setTimestamp(Timestamp.valueOf(now.format(formatter)));
-        requestDto.setUri("/events");
-//        requestDto.setApp(nameService);
-        requestDto.setIp(request.getRemoteAddr());
+
+        HitRequestDto requestDto = HitRequestDto.builder()
+                .timestamp(currentTime)
+                .app(nameService)
+                .uri("/events")
+                .ip(remoteAddr)
+                .build();
+
         statsClient.createHit(requestDto);
-        sendStatForEveryEvent(events, remoteAddr, LocalDateTime.now(), nameService);
+        sendStatForEveryEvent(events, remoteAddr, currentTime, "main-service");
     }
 
     @Override
-    public void sendStatForTheEvent(Long eventId, String remoteAddr, LocalDateTime now,
+    public void sendStatForTheEvent(Long eventId, String remoteAddr, OffsetDateTime now,
                                     String nameService) {
-        HitRequestDto requestDto = new HitRequestDto();
-        requestDto.setTimestamp(Timestamp.valueOf(now.format(formatter)));
-        requestDto.setUri("/events/" + eventId);
-//        requestDto.setApp(nameService);
-        requestDto.setIp(remoteAddr);
+        HitRequestDto requestDto = HitRequestDto.builder()
+                .timestamp(now)
+                .uri("/events/" + eventId)
+                .app(nameService)
+                .ip(remoteAddr)
+                .build();
+        log.info("app: {} \nuri: {}\nip: {}\ntimestemp:{}\n",
+                requestDto.getApp(),
+                requestDto.getUri(),
+                requestDto.getIp(),
+                requestDto.getTimestamp());
+
         statsClient.createHit(requestDto);
     }
 
     @Override
-    public void sendStatForEveryEvent(List<Event> events, String remoteAddr, LocalDateTime now,
+    public void sendStatForEveryEvent(List<Event> events, String remoteAddr, OffsetDateTime now,
                                       String nameService) {
-        for (Event event : events) {
-            HitRequestDto requestDto = new HitRequestDto();
-            requestDto.setTimestamp(Timestamp.valueOf(now.format(formatter)));
-            requestDto.setUri("/events/" + event.getId());
-//            requestDto.setApp(nameService);
-            requestDto.setIp(remoteAddr);
+        events.forEach(event -> {
+            HitRequestDto requestDto = HitRequestDto.builder()
+                    .timestamp(now)
+                    .uri("/events/" + event.getId())
+                    .ip(remoteAddr)
+                    .app(nameService)
+                    .build();
+            log.info("app: {} \nuri: {}\nip: {}\ntimestemp:{}\n",
+                    requestDto.getApp(),
+                    requestDto.getUri(),
+                    requestDto.getIp(),
+                    requestDto.getTimestamp());
+
             statsClient.createHit(requestDto);
-        }
+        });
     }
 
     @Override
     public void setView(Event event) {
         String startTime = event.getCreatedOn().format(formatter);
-        String endTime = LocalDateTime.now().format(formatter);
+        String endTime = OffsetDateTime.now(ZoneOffset.UTC).format(formatter);
         List<String> uris = List.of("/events/" + event.getId());
 
         List<ViewStatsResponseDto> stats = getStats(startTime, endTime, uris);
-        if (stats.size() == 1) {
-            event.setViews(stats.get(0).getHits());
-        } else {
-            event.setViews(0L);
-        }
+        event.setViews(stats.isEmpty() ? 0L : stats.get(0).getHits());
     }
 
     @Override

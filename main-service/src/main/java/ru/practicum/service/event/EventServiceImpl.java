@@ -263,7 +263,12 @@ public class EventServiceImpl implements EventService {
     private void assignViewCounts(List<Event> events) {
         if (events.isEmpty()) return;
 
-        LocalDateTime latestStart = events.stream().map(Event::getCreatedOn).max(LocalDateTime::compareTo).orElse(LocalDateTime.now());
+        LocalDateTime latestStart = events.stream()
+                .map(Event::getCreatedOn)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(LocalDateTime.now());
+
         String startTime = latestStart.format(formatter);
         String endTime = LocalDateTime.now().format(formatter);
 
