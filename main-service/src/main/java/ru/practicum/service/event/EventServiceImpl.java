@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotExistException("User not found with id: " + userId));
         if (newEvent.getParticipantLimit() < 0) {
-           throw  new EvetnValidationException("limit can't de negative");
+           throw  new EvetnValidationException("limit can't de negative or de null");
         }
         if (newEvent.getAnnotation().isEmpty()) throw new RuntimeException("annotatnios can't de null");
 
@@ -101,11 +101,14 @@ public class EventServiceImpl implements EventService {
         if (event.getPublishedOn() != null) throw new AlreadyPublishedException("Event already published");
         if (userUpdateDto == null) return eventMapper.toEventFullDto(event);
 
+        if (userUpdateDto.getParticipantLimit() == null) {
+            applyUserUpdates(event, userUpdateDto);
+            return eventMapper.toEventFullDto(eventRepo.save(event));
+        }
+
         if (userUpdateDto.getParticipantLimit() < 0) {
             throw new EvetnValidationException("limit can't de negative");
         }
-
-        applyUserUpdates(event, userUpdateDto);
 
         return eventMapper.toEventFullDto(eventRepo.save(event));
     }
@@ -166,10 +169,22 @@ public class EventServiceImpl implements EventService {
         if (categoryIds != null && !categoryIds.isEmpty()) filters.add(root.get("category").get("id").in(categoryIds));
         if (paid != null) filters.add(paid ? cb.isTrue(root.get("paid")) : cb.isFalse(root.get("paid")));
 
-        if (rangeStart != null)
-            filters.add(cb.greaterThanOrEqualTo(root.get("eventDate"), LocalDateTime.parse(rangeStart, formatter)));
-        if (rangeEnd != null)
-            filters.add(cb.lessThanOrEqualTo(root.get("eventDate"), LocalDateTime.parse(rangeEnd, formatter)));
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (rangeStart != null) {
+            start = LocalDateTime.parse(rangeStart, formatter);
+            filters.add(cb.greaterThanOrEqualTo(root.get("eventDate"), start));
+        }
+
+        if (rangeEnd != null) {
+            end = LocalDateTime.parse(rangeEnd, formatter);
+            filters.add(cb.lessThanOrEqualTo(root.get("eventDate"), end));
+        }
+
+        if (start != null && end != null && !end.isAfter(start)) {
+            throw new RequestParamValidError("date start can't be after end");
+        }
 
         query.select(root).where(cb.and(filters.toArray(new Predicate[0]))).orderBy(cb.asc(root.get("eventDate")));
 
@@ -201,8 +216,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepo.findByIdAndPublishedOnIsNotNull(id)
                 .orElseThrow(() -> new EventNotExistException("Published event not found with id: " + id));
 
-        event = statsService.setView(event);
         statsService.sendStat(event, request);
+        event = statsService.setView(event);
         log.debug("event: {}", event.toString());
         return eventMapper.toEventFullDto(event);
     }
@@ -294,19 +309,22 @@ public class EventServiceImpl implements EventService {
         String endTime = LocalDateTime.now().format(formatter);
 
         Map<String, Event> uriToEventMap = new HashMap<>();
-        List<String> uris = new ArrayList<>();
+        List<String> uris = events.stream()
+                .map(e -> "/events/" + e.getId())
+                .collect(Collectors.toList());
 
-        for (Event event : events) {
-            String uri = "/events/" + event.getId();
-            uris.add(uri);
-            uriToEventMap.put(uri, event);
-            event.setViews(0L);
-        }
+        events.forEach(e -> {
+            uriToEventMap.put("/events/" + e.getId(), e);
+//            e.setViews(0L);
+        });
 
         List<ViewStatsResponseDto> stats = statsService.getStats(startTime, endTime, uris);
         stats.forEach(stat -> {
-            Event e = uriToEventMap.get(stat.getUri());
-            if (e != null) e.setViews(stat.getHits());
+            Event event = uriToEventMap.get(stat.getUri());
+            if (event != null) {
+                event.setViews(stat.getHits());
+            }
         });
+        eventRepo.saveAll(events);
     }
 }
