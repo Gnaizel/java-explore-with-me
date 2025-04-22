@@ -2,6 +2,7 @@ package ru.practicum.controller.authorized;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
+@Slf4j
 @Validated
 public class AuthEventController {
     private final EventService eventService;
@@ -30,6 +32,7 @@ public class AuthEventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable Long userId, @Valid @RequestBody EventCreateDto eventCreateDto) {
+        log.debug("request: {}", eventCreateDto.toString());
         return eventService.createEvent(userId, eventCreateDto);
     }
 

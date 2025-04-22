@@ -94,13 +94,14 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public void setView(Event event) {
+    public Event setView(Event event) {
         String startTime = event.getCreatedOn().format(formatter);
         String endTime = OffsetDateTime.now(ZoneOffset.UTC).format(formatter);
         List<String> uris = List.of("/events/" + event.getId());
 
         List<ViewStatsResponseDto> stats = getStats(startTime, endTime, uris);
         event.setViews(stats.isEmpty() ? 0L : stats.get(0).getHits());
+        return event;
     }
 
     @Override

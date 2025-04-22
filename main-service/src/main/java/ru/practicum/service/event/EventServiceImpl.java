@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepo;
@@ -51,12 +53,18 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new CategoryNotExistException("Category not found"));
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotExistException("User not found with id: " + userId));
+        if (newEvent.getParticipantLimit() < 0) {
+            new RuntimeException("limit can't de negative");
+        }
+        if (newEvent.getAnnotation().isEmpty()) throw new RuntimeException("annotatnios can't de null");
 
         Event event = eventMapper.toEventModel(newEvent);
         event.setCategory(category);
         event.setInitiator(user);
+        Event saveEvent = eventRepo.save(event);
+        //  saveEvent.setViews(statsService.getStats(saveEvent.getCreatedOn(), LocalDateTime.now(), "/users/{userId}/events"));
 
-        return eventMapper.toEventFullDto(eventRepo.save(event));
+        return eventMapper.toEventFullDto(saveEvent);
     }
 
     @Override
@@ -72,6 +80,10 @@ public class EventServiceImpl implements EventService {
 
         if (adminUpdateDto == null) return eventMapper.toEventFullDto(event);
 
+        if (adminUpdateDto.getParticipantLimit() < 0) {
+            new RuntimeException("limit can't de negative");
+        }
+
         applyAdminUpdates(event, adminUpdateDto);
 
         return eventMapper.toEventFullDto(eventRepo.save(event));
@@ -84,6 +96,10 @@ public class EventServiceImpl implements EventService {
 
         if (event.getPublishedOn() != null) throw new AlreadyPublishedException("Event already published");
         if (userUpdateDto == null) return eventMapper.toEventFullDto(event);
+
+        if (userUpdateDto.getParticipantLimit() < 0) {
+            new RuntimeException("limit can't de negative");
+        }
 
         applyUserUpdates(event, userUpdateDto);
 
@@ -181,8 +197,9 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepo.findByIdAndPublishedOnIsNotNull(id)
                 .orElseThrow(() -> new EventNotExistException("Published event not found with id: " + id));
 
-        statsService.setView(event);
+        event = statsService.setView(event);
         statsService.sendStat(event, request);
+        log.debug("event: {}", event.toString());
         return eventMapper.toEventFullDto(event);
     }
 

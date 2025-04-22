@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.enums.EventStat;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class Event {
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
     private long confirmedRequests;
+    @CreationTimestamp
     @Column(name = "created_On")
     private LocalDateTime createdOn;
     private String description;
