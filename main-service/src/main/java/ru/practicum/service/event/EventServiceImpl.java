@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotExistException("User not found with id: " + userId));
         if (newEvent.getParticipantLimit() < 0) {
-            new EvetnValidationException("limit can't de negative");
+           throw  new EvetnValidationException("limit can't de negative");
         }
         if (newEvent.getAnnotation().isEmpty()) throw new RuntimeException("annotatnios can't de null");
 
@@ -80,11 +80,15 @@ public class EventServiceImpl implements EventService {
 
         if (adminUpdateDto == null) return eventMapper.toEventFullDto(event);
 
-        if (adminUpdateDto.getParticipantLimit() < 0) {
-            new EvetnValidationException("limit can't de negative");
+        if (adminUpdateDto.getParticipantLimit() == null) {
+            applyAdminUpdates(event, adminUpdateDto);
+            return eventMapper.toEventFullDto(eventRepo.save(event));
         }
 
-        applyAdminUpdates(event, adminUpdateDto);
+        if (adminUpdateDto.getParticipantLimit() < 0) {
+            throw new EvetnValidationException("limit can't de negative");
+        }
+
 
         return eventMapper.toEventFullDto(eventRepo.save(event));
     }
@@ -98,7 +102,7 @@ public class EventServiceImpl implements EventService {
         if (userUpdateDto == null) return eventMapper.toEventFullDto(event);
 
         if (userUpdateDto.getParticipantLimit() < 0) {
-            new EvetnValidationException("limit can't de negative");
+            throw new EvetnValidationException("limit can't de negative");
         }
 
         applyUserUpdates(event, userUpdateDto);
