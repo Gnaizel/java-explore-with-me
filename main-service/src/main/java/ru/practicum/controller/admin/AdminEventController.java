@@ -2,6 +2,7 @@ package ru.practicum.controller.admin;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
@@ -15,12 +16,14 @@ import java.util.List;
 @RequestMapping("/admin/events")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class AdminEventController {
     private final EventService eventService;
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable(name = "eventId") Long eventId,
                                     @Valid @RequestBody EventUpdateAdmDto eventUpdateAdmDto) {
+        log.debug("Admin update event: {}", eventUpdateAdmDto.toString());
         return eventService.updateEvent(eventId, eventUpdateAdmDto);
 
     }

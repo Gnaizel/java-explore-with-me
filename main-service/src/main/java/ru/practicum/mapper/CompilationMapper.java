@@ -39,7 +39,7 @@ public class CompilationMapper {
             compilationDto.setEvents(null);
         }
 
-        compilationDto.setPined(compilation.getPinned());
+        compilationDto.setPinned(compilation.getPinned());
         compilationDto.setTitle(compilation.getTitle());
 
         return compilationDto;

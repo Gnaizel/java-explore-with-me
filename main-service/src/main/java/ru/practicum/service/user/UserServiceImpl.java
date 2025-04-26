@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        log.debug("[JSON] - UserDto: \n name: {} \n email: {}", userDto.getName(), userDto.getEmail());
+        log.debug("\n[JSON] - UserDto: \n name: {} \n email: {}", userDto.getName(), userDto.getEmail());
         if (userRepository.existsByName(userDto.getName())) {
             log.warn(String.format("Can't create user with name: %s, the name was used by another user", userDto.getName()));
             throw new NameAlreadyExistException(String.format("Can't create user with name: %s, the name was used by another user",

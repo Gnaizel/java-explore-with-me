@@ -97,7 +97,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public Error handleWrongTimeOfEventException(final WrongTimeException exception) {
         return new Error(exception.getMessage(), "For the requested operation the conditions are not met.",

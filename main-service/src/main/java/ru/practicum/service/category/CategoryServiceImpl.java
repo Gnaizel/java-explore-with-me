@@ -15,6 +15,7 @@ import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -26,7 +27,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto createCategory(CreatedCategory newCategoryDto) {
-        if (categoryRepository.existsByName(newCategoryDto.getName())) {
+        if (categoryRepository.findByName(newCategoryDto.getName()).isPresent()) {
             throw new NameAlreadyExistException(String.format("Can't create category because name: %s already used by another category", newCategoryDto.getName()));
         }
         return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.toCategory(newCategoryDto)));
@@ -57,10 +58,18 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) {
         Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new CategoryNotExistException("Category doesn't exist"));
-        if (categoryRepository.existsByName(categoryDto.getName())) {
+        if (categoryDto.getName() == null || categoryDto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be null or empty");
+        }
+
+        Optional<Category> categoryOptional = categoryRepository.findByName(categoryDto.getName());
+
+        if (categoryOptional.isPresent() && !categoryOptional.get().getId().equals(catId)) {
             throw new NameAlreadyExistException(String.format("Can't update category because name: %s already used by another category", categoryDto.getName()));
         }
+
         category.setName(categoryDto.getName());
+
         return categoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 }

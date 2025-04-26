@@ -17,7 +17,7 @@ public class HitRequestDto {
     private Long id;
     @NotBlank
     private String app;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") // формат с часовым поясом
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private OffsetDateTime timestamp;
     @NotBlank
     private String uri;

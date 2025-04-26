@@ -49,6 +49,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto createEvent(Long userId, EventCreateDto newEvent) {
         validateEventDate(newEvent.getEventDate(), 2);
+        if (newEvent.getDescription().isBlank()) throw new EvetnValidationException("Description can't be empty");
         Category category = categoryRepo.findById(newEvent.getCategory())
                 .orElseThrow(() -> new CategoryNotExistException("Category not found"));
         User user = userRepo.findById(userId)
@@ -56,14 +57,16 @@ public class EventServiceImpl implements EventService {
         if (newEvent.getParticipantLimit() < 0) {
            throw  new EvetnValidationException("limit can't de negative or de null");
         }
-        if (newEvent.getAnnotation().isEmpty()) throw new RuntimeException("annotatnios can't de null");
+        if (newEvent.getAnnotation().isBlank()) throw new EvetnValidationException("Annotation can't de null or empty");
 
         Event event = eventMapper.toEventModel(newEvent);
         event.setCategory(category);
         event.setInitiator(user);
+        event.setRequestModeration(newEvent.getRequestModeration() != null ? newEvent.getRequestModeration() : true);
         Event saveEvent = eventRepo.save(event);
+        saveEvent.setState(EventStat.PENDING);
         //  saveEvent.setViews(statsService.getStats(saveEvent.getCreatedOn(), LocalDateTime.now(), "/users/{userId}/events"));
-
+        log.debug("Event pass validation");
         return eventMapper.toEventFullDto(saveEvent);
     }
 
@@ -81,8 +84,7 @@ public class EventServiceImpl implements EventService {
         if (adminUpdateDto == null) return eventMapper.toEventFullDto(event);
 
         if (adminUpdateDto.getParticipantLimit() == null) {
-            applyAdminUpdates(event, adminUpdateDto);
-            return eventMapper.toEventFullDto(eventRepo.save(event));
+            return eventMapper.toEventFullDto(eventRepo.save(applyAdminUpdates(event, adminUpdateDto)));
         }
 
         if (adminUpdateDto.getParticipantLimit() < 0) {
@@ -90,7 +92,7 @@ public class EventServiceImpl implements EventService {
         }
 
 
-        return eventMapper.toEventFullDto(eventRepo.save(event));
+        return eventMapper.toEventFullDto(eventRepo.save(applyAdminUpdates(event, adminUpdateDto)));
     }
 
     @Override
@@ -233,7 +235,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void applyAdminUpdates(Event event, EventUpdateAdmDto dto) {
+    private Event applyAdminUpdates(Event event, EventUpdateAdmDto dto) {
         Optional.ofNullable(dto.getAnnotation()).ifPresent(event::setAnnotation);
         Optional.ofNullable(dto.getCategory()).ifPresent(catId ->
                 event.setCategory(categoryRepo.findById(catId).orElseThrow(() -> new CategoryNotExistException("Category not found"))));
@@ -258,6 +260,7 @@ public class EventServiceImpl implements EventService {
             }
             event.setEventDate(dto.getEventDate());
         }
+        return event;
     }
 
     private void applyUserUpdates(Event event, EventUpdateUserDto dto) {
@@ -276,6 +279,7 @@ public class EventServiceImpl implements EventService {
         Optional.ofNullable(dto.getTitle()).ifPresent(event::setTitle);
 
         if (dto.getStateAction() != null) {
+//            event.setState(EventStat.PENDING);
             if (dto.getStateAction() == StatForUser.SEND_TO_REVIEW) {
                 event.setState(EventStat.PENDING);
             } else {

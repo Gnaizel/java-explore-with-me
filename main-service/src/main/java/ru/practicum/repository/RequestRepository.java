@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import ru.practicum.enums.RequestStatus;
 import ru.practicum.model.Request;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     List<Request> findAllByRequester(Long userId);
 
-    List<Request> findAllByEvent(Long eventId);
+    List<Request> findAllByEventAndStatus(Long eventId, RequestStatus status);
 
     Optional<Request> findByRequesterAndId(Long userId, Long requestId);
 }

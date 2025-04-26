@@ -50,7 +50,7 @@ public class AuthEventController {
 
     @PatchMapping("/{eventId}/requests")
     public RequestStatusUpdateResult updateRequests(@PathVariable Long userId, @PathVariable Long eventId,
-                                                    @RequestBody RequestStatusUpdateDto requestStatusUpdateDto) {
+                                                    @RequestBody(required = false) RequestStatusUpdateDto requestStatusUpdateDto) {
         return requestService.updateRequests(userId, eventId, requestStatusUpdateDto);
     }
 

@@ -1,6 +1,7 @@
 package ru.practicum.service.request;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.request.RequestDto;
@@ -23,15 +24,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
-    private final RequestMapper requestMapper;
     private final UserRepository userRepository;
 
     @Override
     public List<RequestDto> getRequestsByOwnerOfEvent(Long userId, Long eventId) {
-        return requestMapper.toRequestDtoList(requestRepository.findAllByEventWithInitiator(userId, eventId));
+        return RequestMapper.toRequestDtoList(requestRepository.findAllByEventWithInitiator(userId, eventId));
     }
 
     @Override
@@ -39,6 +40,7 @@ public class RequestServiceImpl implements RequestService {
         if (requestRepository.existsByRequesterAndEvent(userId, eventId)) {
             throw new RequestAlreadyExistException("Request already exists");
         }
+        log.debug(eventId.toString());
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotExistException("Event doesnt exist"));
         if (event.getInitiator().getId().equals(userId)) {
             throw new WrongUserException("Can't create request by initiator");
@@ -48,18 +50,21 @@ public class RequestServiceImpl implements RequestService {
             throw new EventIsNotPublishedException("Event is not published yet");
         }
 
-        List<Request> requests = requestRepository.findAllByEvent(eventId);
+        List<Request> requests = requestRepository.findAllByEventAndStatus(eventId, RequestStatus.CONFIRMED);
 
-        if (!event.getRequestModeration() && requests.size() >= event.getParticipantLimit()) {
+        if (requests.size() + 1 >= event.getParticipantLimit() && event.getParticipantLimit() != 0) {
+            log.debug("\nrequests : {}\n limit: {}", requests.size(), event.getParticipantLimit());
             throw new ParticipantLimitException("Member limit exceeded ");
         }
+        log.debug("\nrequests : {}\n limit: {}", requests.size(), event.getParticipantLimit());
 
         Request request = new Request();
         request.setCreated(LocalDateTime.now());
         request.setEvent(eventId);
         request.setRequester(userId);
-        request.setStatus(RequestStatus.PENDING);
-        return requestMapper.toRequestDto(requestRepository.save(request));
+        request.setStatus(event.getRequestModeration() ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
+        if (event.getParticipantLimit() == 0) request.setStatus(RequestStatus.CONFIRMED);
+        return RequestMapper.toRequestDto(requestRepository.save(request));
     }
 
 //    @Transactional
@@ -109,9 +114,11 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     @Override
     public RequestStatusUpdateResult updateRequests(Long userId, Long eventId, RequestStatusUpdateDto requestStatusUpdateDto) {
-        if (requestStatusUpdateDto.getRequestIds() == null
-                || requestStatusUpdateDto.getRequestIds().stream().anyMatch(Objects::isNull)) {
-            throw new InvalidRequestException("Request IDs cannot be null");
+        if (requestStatusUpdateDto != null) {
+            if (requestStatusUpdateDto.getRequestIds() == null
+                    || requestStatusUpdateDto.getRequestIds().stream().anyMatch(Objects::isNull)) {
+                throw new InvalidRequestException("Request IDs cannot be null");
+            }
         }
 
         Event event = eventRepository.findById(eventId)
@@ -148,6 +155,7 @@ public class RequestServiceImpl implements RequestService {
                 throw new ParticipantLimitException(
                         "Only " + availableSlots + " slots available");
             }
+            log.debug("Request confirmed | count: {}", event.getConfirmedRequests());
         }
 
         requestsToUpdate.forEach(request ->
@@ -158,9 +166,9 @@ public class RequestServiceImpl implements RequestService {
         if (requestStatusUpdateDto.getStatus() == RequestStatusToUpdate.CONFIRMED) {
             event.setConfirmedRequests(event.getConfirmedRequests() + requestsToUpdate.size());
             eventRepository.save(event);
-            result.setConfirmedRequests(requestMapper.toRequestDtoList(requestsToUpdate));
+            result.setConfirmedRequests(RequestMapper.toRequestDtoList(requestsToUpdate));
         } else {
-            result.setRejectedRequests(requestMapper.toRequestDtoList(requestsToUpdate));
+            result.setRejectedRequests(RequestMapper.toRequestDtoList(requestsToUpdate));
         }
 
         return result;
@@ -169,13 +177,13 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<RequestDto> getCurrentUserRequests(Long userId) {
         userRepository.findById(userId).orElseThrow(() -> new UserNotExistException(String.format("User with id=%s was not found", userId)));
-        return requestMapper.toRequestDtoList(requestRepository.findAllByRequester(userId));
+        return RequestMapper.toRequestDtoList(requestRepository.findAllByRequester(userId));
     }
 
     @Override
     public RequestDto cancelRequests(Long userId, Long requestId) {
         Request request = requestRepository.findByRequesterAndId(userId, requestId).orElseThrow(() -> new RequestNotExistException(String.format("Request with id=%s was not found", requestId)));
         request.setStatus(RequestStatus.CANCELED);
-        return requestMapper.toRequestDto(requestRepository.save(request));
+        return RequestMapper.toRequestDto(requestRepository.save(request));
     }
 }
