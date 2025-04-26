@@ -325,6 +325,7 @@ public class EventServiceImpl implements EventService {
                 event.setViews(stat.getHits());
             }
         });
+        log.debug(events.stream().map(event -> event.getViews()).toString());
         eventRepo.saveAll(events);
     }
 }

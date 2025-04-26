@@ -42,6 +42,7 @@ public class StatsController {
     ) {
         log.info("start: {}, end: {}", start, end);
         List<ViewStats> viewStats = statsService.getViewStats(start, end, uris, unique);
+        log.debug(viewStats.toString());
         return statsMapper.toViewListResponse(viewStats);
     }
 }
