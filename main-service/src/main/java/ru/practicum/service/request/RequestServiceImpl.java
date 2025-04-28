@@ -20,6 +20,7 @@ import ru.practicum.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +42,12 @@ public class RequestServiceImpl implements RequestService {
             throw new RequestAlreadyExistException("Request already exists");
         }
         log.debug(eventId.toString());
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotExistException("Event doesnt exist"));
+//        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotExistException("Event doesnt exist"));
+        Optional<Event> event1 = eventRepository.findById(eventId);
+        if (!event1.isPresent()) {
+            throw new EvetnValidationException("Event doesnt exist");
+        }
+        Event event = event1.get();
         if (event.getInitiator().getId().equals(userId)) {
             throw new WrongUserException("Can't create request by initiator");
         }
@@ -52,7 +58,7 @@ public class RequestServiceImpl implements RequestService {
 
         List<Request> requests = requestRepository.findAllByEventAndStatus(eventId, RequestStatus.CONFIRMED);
 
-        if (requests.size() + 1 >= event.getParticipantLimit() && event.getParticipantLimit() != 0) {
+        if (requests.size() >= event.getParticipantLimit() && event.getParticipantLimit() != 0) {
             log.debug("\nrequests : {}\n limit: {}", requests.size(), event.getParticipantLimit());
             throw new ParticipantLimitException("Member limit exceeded ");
         }

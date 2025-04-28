@@ -15,6 +15,7 @@ import ru.practicum.model.ViewStats;
 import ru.practicum.service.StatsService;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -40,6 +41,9 @@ public class StatsController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
+        LocalDateTime localDateTime1 = start.toLocalDateTime();
+
+        start = Timestamp.valueOf(localDateTime1.minusSeconds(5));
         log.info("start: {}, end: {}", start, end);
         List<ViewStats> viewStats = statsService.getViewStats(start, end, uris, unique);
         log.debug(viewStats.toString());

@@ -39,17 +39,17 @@ public class StatsClient {
 
         Map<String, Object> parameters = new HashMap<>();
 
-        parameters.put("start", start);
-        parameters.put("end", end);
+        parameters.put("start", end);
+        parameters.put("end", start);
         parameters.put("uris", uris);
         parameters.put("unique", unique);
 
+        log.debug(parameters.toString());
         ResponseEntity<String> response = restTemplate.getForEntity(
                 serverUrl + "/stats?start={start}&end={end}&uris={uris}&unique={unique}",
                 String.class, parameters);
 
         ObjectMapper objectMapper = new ObjectMapper();
-
         try {
             return Arrays.asList(objectMapper.readValue(response.getBody(), ViewStatsResponseDto[].class));
         } catch (JsonProcessingException exception) {
