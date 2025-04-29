@@ -15,7 +15,8 @@ import ru.practicum.model.ViewStats;
 import ru.practicum.service.StatsService;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -31,6 +32,7 @@ public class StatsController {
     public HitResponseDto hit(@Valid @RequestBody HitRequestDto request) {
         log.info(request.toString());
         HitBody hitBody = statsService.save(statsMapper.toHit(request));
+        log.debug(hitBody.getTimestamp().toString());
         return statsMapper.toHitResponseDto(hitBody);
     }
 
@@ -38,15 +40,17 @@ public class StatsController {
     public List<ViewStatsResponseDto> stats(
             @RequestParam Timestamp start,
             @RequestParam Timestamp end,
-            @RequestParam(required = false) List<String> uris,
+            @RequestParam(required = false) String uris, // Изменили тип на String
             @RequestParam(defaultValue = "false") boolean unique
     ) {
-        LocalDateTime localDateTime1 = start.toLocalDateTime();
+        log.info("start: {}, end: {}, uris: {}", start, end, uris);
 
-        start = Timestamp.valueOf(localDateTime1.minusSeconds(5));
-        log.info("start: {}, end: {}", start, end);
-        List<ViewStats> viewStats = statsService.getViewStats(start, end, uris, unique);
-        log.debug(viewStats.toString());
+        // Преобразуем строку в список URI (удаляем скобки и разбиваем по запятым)
+        List<String> uriList = (uris != null && !uris.isEmpty())
+                ? Arrays.asList(uris.replaceAll("[\\[\\]]", "").split(","))
+                : Collections.emptyList();
+
+        List<ViewStats> viewStats = statsService.getViewStats(start, end, uriList, unique);
         return statsMapper.toViewListResponse(viewStats);
     }
 }

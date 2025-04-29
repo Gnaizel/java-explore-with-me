@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS stats;
-
 CREATE TABLE IF NOT EXISTS statistic
 (
     id

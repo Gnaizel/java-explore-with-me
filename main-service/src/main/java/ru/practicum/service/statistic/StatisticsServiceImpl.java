@@ -9,8 +9,8 @@ import ru.practicum.dto.HitRequestDto;
 import ru.practicum.dto.ViewStatsResponseDto;
 import ru.practicum.model.Event;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public void sendStat(Event event, HttpServletRequest request) {
-        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
+        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
         String remoteAddr = request.getRemoteAddr();
 
         HitRequestDto requestDto = HitRequestDto.builder()
@@ -41,7 +41,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public void sendStat(List<Event> events, HttpServletRequest request) {
-        OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
+        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
         String remoteAddr = request.getRemoteAddr();
 
         HitRequestDto requestDto = HitRequestDto.builder()
@@ -56,7 +56,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public void sendStatForTheEvent(Long eventId, String remoteAddr, OffsetDateTime now,
+    public void sendStatForTheEvent(Long eventId, String remoteAddr, Timestamp now,
                                     String nameService) {
         HitRequestDto requestDto = HitRequestDto.builder()
                 .timestamp(now)
@@ -74,7 +74,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public void sendStatForEveryEvent(List<Event> events, String remoteAddr, OffsetDateTime now,
+    public void sendStatForEveryEvent(List<Event> events, String remoteAddr, Timestamp now,
                                       String nameService) {
         events.forEach(event -> {
             HitRequestDto requestDto = HitRequestDto.builder()
@@ -95,8 +95,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public Event setView(Event event) {
-        String startTime = event.getCreatedOn().format(formatter);
-        String endTime = OffsetDateTime.now(ZoneOffset.UTC).format(formatter);
+        String startTime = event.getCreatedOn().minusMinutes(1).format(formatter);
+        String endTime = LocalDateTime.now().plusMinutes(1).format(formatter);
         List<String> uris = List.of("/events/" + event.getId());
 
         List<ViewStatsResponseDto> stats = getStats(startTime, endTime, uris);
@@ -106,6 +106,6 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<ViewStatsResponseDto> getStats(String startTime, String endTime, List<String> uris) {
-        return statsClient.getStats(startTime, endTime, uris, false);
+        return statsClient.getStats(startTime, endTime, uris, true);
     }
 }

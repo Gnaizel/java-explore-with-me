@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import ru.practicum.dto.ViewStatsResponseDto;
 import ru.practicum.model.Event;
 
-import java.time.OffsetDateTime;
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface StatisticsService {
@@ -12,10 +12,10 @@ public interface StatisticsService {
 
     void sendStat(List<Event> events, HttpServletRequest request);
 
-    void sendStatForTheEvent(Long eventId, String remoteAddr, OffsetDateTime now,
+    void sendStatForTheEvent(Long eventId, String remoteAddr, Timestamp now,
                              String nameService);
 
-    void sendStatForEveryEvent(List<Event> events, String remoteAddr, OffsetDateTime now,
+    void sendStatForEveryEvent(List<Event> events, String remoteAddr, Timestamp now,
                                String nameService);
 
     Event setView(Event event);
