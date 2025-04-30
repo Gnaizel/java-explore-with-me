@@ -4,8 +4,8 @@ import org.springframework.stereotype.Component;
 import ru.practicum.dto.event.EventCreateDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
-import ru.practicum.model.Category;
 import ru.practicum.model.Event;
+import ru.practicum.repository.CategoryRepository;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -16,11 +16,13 @@ public class EventMapper {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final CategoryMapper categoryMapper;
+    private final CategoryRepository categoryRepository;
     private final UserMapper userMapper;
 
-    public EventMapper(CategoryMapper categoryMapper,
+    public EventMapper(CategoryMapper categoryMapper, CategoryRepository categoryRepository,
                        UserMapper userMapper) {
         this.categoryMapper = categoryMapper;
+        this.categoryRepository = categoryRepository;
         this.userMapper = userMapper;
     }
 
@@ -56,7 +58,7 @@ public class EventMapper {
         }
         Event event = new Event();
         event.setAnnotation(dto.getAnnotation());
-        event.setCategory(new Category(dto.getCategory(), null));
+        event.setCategory(categoryRepository.getReferenceById(dto.getCategory()));
         event.setDescription(dto.getDescription());
         event.setEventDate(dto.getEventDate());
         event.setLocation(dto.getLocation());

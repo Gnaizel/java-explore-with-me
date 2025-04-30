@@ -15,8 +15,6 @@ import ru.practicum.model.ViewStats;
 import ru.practicum.service.StatsService;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -40,17 +38,16 @@ public class StatsController {
     public List<ViewStatsResponseDto> stats(
             @RequestParam Timestamp start,
             @RequestParam Timestamp end,
-            @RequestParam(required = false) String uris, // Изменили тип на String
+            @RequestParam(name = "uris", required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
         log.info("start: {}, end: {}, uris: {}", start, end, uris);
 
-        // Преобразуем строку в список URI (удаляем скобки и разбиваем по запятым)
-        List<String> uriList = (uris != null && !uris.isEmpty())
-                ? Arrays.asList(uris.replaceAll("[\\[\\]]", "").split(","))
-                : Collections.emptyList();
+//        List<String> uriList = (uris != null && !uris.isEmpty())
+//                ? Arrays.asList(uris.replaceAll("[\\[\\]]", "").split(","))
+//                : Collections.emptyList();
 
-        List<ViewStats> viewStats = statsService.getViewStats(start, end, uriList, unique);
+        List<ViewStats> viewStats = statsService.getViewStats(start, end, uris, unique);
         return statsMapper.toViewListResponse(viewStats);
     }
 }

@@ -123,7 +123,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, EventStat states, List<Long> categoriesId,
+    public List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, List<EventStat> states, List<Long> categoriesId,
                                                          String rangeStart, String rangeEnd, Integer from, Integer size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);

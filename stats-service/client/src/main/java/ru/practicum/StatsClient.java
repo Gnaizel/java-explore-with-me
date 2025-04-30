@@ -7,17 +7,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.dto.EndpointHitRequest;
 import ru.practicum.dto.HitRequestDto;
 import ru.practicum.dto.ViewStatsResponseDto;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -49,23 +49,28 @@ public class StatsClient {
 
     public List<ViewStatsResponseDto> getStats(String start, String end, List<String> uris, Boolean unique) {
 
-        Map<String, Object> parameters = new HashMap<>();
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
+                .queryParam("start", start)
+                .queryParam("end", end)
+                .queryParam("unique", unique);
 
-        parameters.put("start", start);
-        parameters.put("end", end);
-        parameters.put("uris", uris);
-        parameters.put("unique", unique);
+        if (uris != null) {
+            uris.forEach(uri -> builder.queryParam("uris", uri));
+        }
 
-        log.debug(parameters.toString());
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                serverUrl + "/stats?start={start}&end={end}&uris={uris}&unique={unique}",
-                String.class, parameters);
+
+        String url = builder.encode(StandardCharsets.UTF_8)
+                .toUriString()
+                .replace("%20", " ");
+        log.debug("Request URL: {}", url);
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return Arrays.asList(objectMapper.readValue(response.getBody(), ViewStatsResponseDto[].class));
-        } catch (JsonProcessingException exception) {
-            throw new RuntimeException(String.format("Json processing error: %s", exception.getMessage()));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON parsing error", e);
         }
     }
 }

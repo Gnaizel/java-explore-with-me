@@ -20,7 +20,7 @@ public interface EventService {
 
     EventFullDto getEventByUser(Long userId, Long eventId);
 
-    List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, EventStat states, List<Long> categoriesId,
+    List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, List<EventStat> states, List<Long> categoriesId,
                                                   String rangeStart, String rangeEnd, Integer from, Integer size);
 
     List<EventFullDto> getEventsWithParamsByUser(String text, List<Long> categories, Boolean paid, String rangeStart,

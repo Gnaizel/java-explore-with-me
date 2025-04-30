@@ -28,9 +28,10 @@ public class AdminEventController {
 
     }
 
+
     @GetMapping
     public List<EventFullDto> getEvents(@RequestParam(name = "users", required = false) List<Long> users,
-                                        @RequestParam(name = "states", required = false) EventStat states,
+                                        @RequestParam(name = "states", required = false) List<EventStat> states,
                                         @RequestParam(name = "categories", required = false) List<Long> categoriesId,
                                         @RequestParam(name = "rangeStart", required = false) String rangeStart,
                                         @RequestParam(name = "rangeEnd", required = false) String rangeEnd,
