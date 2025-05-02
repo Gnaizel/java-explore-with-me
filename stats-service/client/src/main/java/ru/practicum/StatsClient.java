@@ -1,34 +1,76 @@
 package ru.practicum;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import ru.practicum.dto.EndpointHitRequest;
 import ru.practicum.dto.HitRequestDto;
+import ru.practicum.dto.ViewStatsResponseDto;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 
-public class StatsClient extends BaseClient {
+@Slf4j
+@Service
+public class StatsClient {
+    private final String serverUrl;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final RestTemplate restTemplate;
 
-    private static final String APPLICATION = "ewm-main-service";
-
-    public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(builder
-                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
-                .build()
-        );
+    public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplate restTemplate) {
+        this.serverUrl = serverUrl;
+        this.restTemplate = restTemplate;
     }
 
-    public void createHit(HttpServletRequest request) {
-        final HitRequestDto hit = HitRequestDto.builder()
-                .app(APPLICATION)
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
-                .timestamp(Timestamp.from(Instant.now()))
+    public void createHit(HitRequestDto endpointHitDto) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        EndpointHitRequest endpointHitRequest = EndpointHitRequest.builder()
+                .id(endpointHitDto.getId())
+                .ip(endpointHitDto.getIp())
+                .app(endpointHitDto.getApp())
+                .uri(endpointHitDto.getUri())
+                .timestamp(LocalDateTime.now(ZoneId.of("UTC")).format(formatter))
                 .build();
-        post("/hit", hit);
+        HttpEntity<EndpointHitRequest> requestEntity = new HttpEntity<>(endpointHitRequest, headers);
+        log.debug(requestEntity.getBody().toString());
+        restTemplate.exchange(serverUrl + "/hit", HttpMethod.POST, requestEntity, EndpointHitRequest.class);
+    }
+
+    public List<ViewStatsResponseDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
+                .queryParam("start", start)
+                .queryParam("end", end)
+                .queryParam("unique", unique);
+
+        if (uris != null) {
+            uris.forEach(uri -> builder.queryParam("uris", uri));
+        }
+
+
+        String url = builder.encode(StandardCharsets.UTF_8)
+                .toUriString()
+                .replace("%20", " ");
+        log.debug("Request URL: {}", url);
+
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return Arrays.asList(objectMapper.readValue(response.getBody(), ViewStatsResponseDto[].class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON parsing error", e);
+        }
     }
 }

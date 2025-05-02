@@ -30,6 +30,7 @@ public class StatsController {
     public HitResponseDto hit(@Valid @RequestBody HitRequestDto request) {
         log.info(request.toString());
         HitBody hitBody = statsService.save(statsMapper.toHit(request));
+        log.debug(hitBody.getTimestamp().toString());
         return statsMapper.toHitResponseDto(hitBody);
     }
 
@@ -37,10 +38,15 @@ public class StatsController {
     public List<ViewStatsResponseDto> stats(
             @RequestParam Timestamp start,
             @RequestParam Timestamp end,
-            @RequestParam(required = false) List<String> uris,
+            @RequestParam(name = "uris", required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
-        log.info("start: {}, end: {}", start, end);
+        log.info("start: {}, end: {}, uris: {}", start, end, uris);
+
+//        List<String> uriList = (uris != null && !uris.isEmpty())
+//                ? Arrays.asList(uris.replaceAll("[\\[\\]]", "").split(","))
+//                : Collections.emptyList();
+
         List<ViewStats> viewStats = statsService.getViewStats(start, end, uris, unique);
         return statsMapper.toViewListResponse(viewStats);
     }
