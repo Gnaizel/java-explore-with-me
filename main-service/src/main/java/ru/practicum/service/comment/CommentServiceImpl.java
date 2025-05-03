@@ -65,11 +65,19 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentShortDto> deleteComment(Long userId, Long commentId) {
-        Comment firstComment = commentRepository.findById(commentId).orElseThrow(() -> new CommentNotExist("Comment not found"));
-        if (firstComment.getUser().getId() != userId) throw new CommentValidationError("You'r not Owner");
+        Comment firstComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotExist("Comment not found"));
+
+        if (!firstComment.getUser().getId().equals(userId)) {
+            throw new CommentValidationError("You're not Owner");
+        }
 
         commentRepository.deleteById(commentId);
-        Event event = eventRepository.findById(firstComment.getEvent()).orElseThrow(() -> new EventNotExistException("Event not found"));
-        return event.getComments().stream().map(CommentMapper::toShortDto).toList();
+        Event event = eventRepository.findById(firstComment.getEvent())
+                .orElseThrow(() -> new EventNotExistException("Event not found"));
+
+        return event.getComments().stream()
+                .map(CommentMapper::toShortDto)
+                .toList();
     }
 }
