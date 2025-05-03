@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.comment.CommentCreateDto;
 import ru.practicum.dto.event.EventCreateDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
@@ -34,6 +35,29 @@ public class AuthEventController {
     public EventFullDto createEvent(@PathVariable Long userId, @Valid @RequestBody EventCreateDto eventCreateDto) {
         log.debug("request: {}", eventCreateDto.toString());
         return eventService.createEvent(userId, eventCreateDto);
+    }
+
+    @PostMapping("/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public EventFullDto createComment(@PathVariable Long eventId,
+                                      @PathVariable Long userId,
+                                      @Valid @RequestBody CommentCreateDto commentCreateDto) {
+        log.debug("comment create endpoint: \n userid: {} \n eventID: {} \n comment: {}", userId, eventId, commentCreateDto.toString());
+
+    }
+
+    @PatchMapping("/{eventId}/comments")
+    public EventFullDto updateComment(@PathVariable Long eventId,
+                                      @PathVariable Long userId,
+                                      @Valid @RequestBody CommentCreateDto commentCreateDto) {
+        log.debug("comment update endpoint: \n userid: {} \n eventID: {} \n comment: {}", userId, eventId, commentCreateDto.toString());
+
+    }
+
+    @DeleteMapping("/{eventId}/comments")
+    public EventFullDto deleteComment(@PathVariable Long eventId, @PathVariable Long userId) {
+        log.debug("comment delete endpoint: \n userid: {} \n eventID: {}", userId, eventId);
+
     }
 
     @GetMapping
