@@ -45,11 +45,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentShortDto> getCommentByEventId(Long eventId) {
-        return List.of();
-    }
-
-    @Override
     public List<CommentShortDto> updateComment(Long userId, Long commentId, CommentCreateDto commentCreateDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistException("User not found"));
         Comment firstComment = commentRepository.findById(commentId).orElseThrow(() -> new CommentNotExist("Comment not found"));
