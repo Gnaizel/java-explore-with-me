@@ -49,6 +49,7 @@ public class EventMapper {
         dto.setState(event.getState());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
+        dto.setComments(event.getComments().stream().map(CommentMapper::toShortDto).toList());
         return dto;
     }
 

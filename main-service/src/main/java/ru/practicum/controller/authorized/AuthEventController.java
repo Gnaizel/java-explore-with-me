@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.comment.CommentCreateDto;
+import ru.practicum.dto.comment.CommentShortDto;
 import ru.practicum.dto.event.EventCreateDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
@@ -14,6 +15,7 @@ import ru.practicum.dto.event.EventUpdateUserDto;
 import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.RequestStatusUpdateDto;
 import ru.practicum.dto.request.RequestStatusUpdateResult;
+import ru.practicum.service.comment.CommentService;
 import ru.practicum.service.event.EventService;
 import ru.practicum.service.request.RequestService;
 
@@ -29,6 +31,7 @@ public class AuthEventController {
     private final EventService eventService;
 
     private final RequestService requestService;
+    private final CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -39,25 +42,29 @@ public class AuthEventController {
 
     @PostMapping("/{eventId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto createComment(@PathVariable Long eventId,
-                                      @PathVariable Long userId,
-                                      @Valid @RequestBody CommentCreateDto commentCreateDto) {
+    public List<CommentShortDto> createComment(@PathVariable Long eventId,
+                                               @PathVariable Long userId,
+                                               @Valid @RequestBody CommentCreateDto commentCreateDto) {
         log.debug("comment create endpoint: \n userid: {} \n eventID: {} \n comment: {}", userId, eventId, commentCreateDto.toString());
 
+        return commentService.createComment(eventId, userId, commentCreateDto);
     }
 
-    @PatchMapping("/{eventId}/comments")
-    public EventFullDto updateComment(@PathVariable Long eventId,
-                                      @PathVariable Long userId,
-                                      @Valid @RequestBody CommentCreateDto commentCreateDto) {
-        log.debug("comment update endpoint: \n userid: {} \n eventID: {} \n comment: {}", userId, eventId, commentCreateDto.toString());
+    @PatchMapping("/{eventId}/comments/{commentId}")
+    public List<CommentShortDto> updateComment(@PathVariable Long userId,
+                                               @PathVariable Long commentId,
+                                               @Valid @RequestBody CommentCreateDto commentCreateDto) {
+        log.debug("comment update endpoint: \n userid: {} \n \n comment: {}", userId, commentCreateDto.toString());
 
+        return commentService.updateComment(userId, commentId, commentCreateDto);
     }
 
-    @DeleteMapping("/{eventId}/comments")
-    public EventFullDto deleteComment(@PathVariable Long eventId, @PathVariable Long userId) {
-        log.debug("comment delete endpoint: \n userid: {} \n eventID: {}", userId, eventId);
+    @DeleteMapping("/{eventId}/comments/{commentId}")
+    public List<CommentShortDto> deleteComment(@PathVariable Long userId,
+                                               @PathVariable Long commentId) {
+        log.debug("comment delete endpoint: \n userid: {}", userId);
 
+        return commentService.deleteComment(userId, commentId);
     }
 
     @GetMapping

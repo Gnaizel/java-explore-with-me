@@ -7,5 +7,6 @@ import lombok.Data;
 @Data
 public class CommentShortDto {
     private String comment;
-    private String author;
+    private long author;
+    private long id;
 }
