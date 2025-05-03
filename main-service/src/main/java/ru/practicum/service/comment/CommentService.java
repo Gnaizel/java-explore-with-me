@@ -6,6 +6,9 @@ import ru.practicum.dto.comment.CommentShortDto;
 import java.util.List;
 
 public interface CommentService {
+
+    List<CommentShortDto> getCommentByEventId(Long eventId);
+
     List<CommentShortDto> createComment(Long eventId,
                                         Long userId,
                                         CommentCreateDto commentCreateDto);

@@ -9,7 +9,6 @@ import ru.practicum.exception.CommentValidationError;
 import ru.practicum.exception.EventNotExistException;
 import ru.practicum.exception.UserNotExistException;
 import ru.practicum.mapper.CommentMapper;
-import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Comment;
 import ru.practicum.model.User;
 import ru.practicum.repository.CommentRepository;
@@ -25,7 +24,6 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
-    private final EventMapper eventMapper;
 
     @Override
     public List<CommentShortDto> createComment(Long eventId, Long userId, CommentCreateDto commentCreateDto) {
@@ -41,6 +39,11 @@ public class CommentServiceImpl implements CommentService {
                 .build();
         commentRepository.save(comment);
         return eventRepository.findById(eventId).get().getComments().stream().map(CommentMapper::toShortDto).toList();
+    }
+
+    @Override
+    public List<CommentShortDto> getCommentByEventId(Long eventId) {
+        return List.of();
     }
 
     @Override

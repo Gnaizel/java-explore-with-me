@@ -40,6 +40,11 @@ public class AuthEventController {
         return eventService.createEvent(userId, eventCreateDto);
     }
 
+    @GetMapping("/{eventId}/comments")
+    public List<CommentShortDto> getCommentsByEventId(@PathVariable Long eventId) {
+        return commentService.getCommentByEventId(eventId);
+    }
+
     @PostMapping("/{eventId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public List<CommentShortDto> createComment(@PathVariable Long eventId,
@@ -50,7 +55,7 @@ public class AuthEventController {
         return commentService.createComment(eventId, userId, commentCreateDto);
     }
 
-    @PatchMapping("/{eventId}/comments/{commentId}")
+    @PatchMapping("/comments/{commentId}")
     public List<CommentShortDto> updateComment(@PathVariable Long userId,
                                                @PathVariable Long commentId,
                                                @Valid @RequestBody CommentCreateDto commentCreateDto) {
@@ -59,7 +64,7 @@ public class AuthEventController {
         return commentService.updateComment(userId, commentId, commentCreateDto);
     }
 
-    @DeleteMapping("/{eventId}/comments/{commentId}")
+    @DeleteMapping("/comments/{commentId}")
     public List<CommentShortDto> deleteComment(@PathVariable Long userId,
                                                @PathVariable Long commentId) {
         log.debug("comment delete endpoint: \n userid: {}", userId);
