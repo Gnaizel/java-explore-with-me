@@ -35,13 +35,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/events/{{eid}}/comments",
+					"raw": "http://localhost:8080/events/5/comments",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"events",
-						"{{eid}}",
+						"5",
 						"comments"
 					]
 				}
@@ -80,15 +82,17 @@
 					"raw": "{\"comment\": \"This is a test comment for event 3.\"}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users/{{uid}}/events/{{eid}}/comments",
+					"raw": "http://localhost:8080/users/3/events/5/comments",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"users",
-						"{{uid}}",
+						"3",
 						"events",
-						"{{eid}}",
+						"5",
 						"comments"
 					]
 				}
@@ -127,13 +131,15 @@
 					"raw": "{\"comment\": \"Updated comment text.\"}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users/{{uid}}/events/comments/1",
+					"raw": "http://localhost:8080/users/3/events/comments/1",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"users",
-						"{{uid}}",
+						"3",
 						"events",
 						"comments",
 						"1"
@@ -148,13 +154,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/events/{{eid}}/comments",
+					"raw": "http://localhost:8080/events/5/comments",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"events",
-						"{{eid}}",
+						"5",
 						"comments"
 					]
 				}
@@ -181,13 +189,15 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/users/{{uid}}/events/comments/1",
+					"raw": "http://localhost:8080/users/3/events/comments/1",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"users",
-						"{{uid}}",
+						"3",
 						"events",
 						"comments",
 						"1"
@@ -225,15 +235,17 @@
 					"raw": "{\"comment\": \"1234\"}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users/{{uid}}/events/{{eid}}/comments",
+					"raw": "http://localhost:8080/users/3/events/5/comments",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"users",
-						"{{uid}}",
+						"3",
 						"events",
-						"{{eid}}",
+						"5",
 						"comments"
 					]
 				}
@@ -269,15 +281,17 @@
 					"raw": "{\"comment\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users/{{uid}}/events/{{eid}}/comments",
+					"raw": "http://localhost:8080/users/3/events/5/comments",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"users",
-						"{{uid}}",
+						"3",
 						"events",
-						"{{eid}}",
+						"5",
 						"comments"
 					]
 				}
@@ -313,15 +327,17 @@
 					"raw": "{\"comment\": \"Valid comment for nonexistent user\"}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users/9999/events/{{eid}}/comments",
+					"raw": "http://localhost:8080/users/9999/events/5/comments",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"users",
 						"9999",
 						"events",
-						"{{eid}}",
+						"5",
 						"comments"
 					]
 				}
@@ -357,13 +373,15 @@
 					"raw": "{\"comment\": \"Valid comment for nonexistent event\"}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users/{{uid}}/events/9999/comments",
+					"raw": "http://localhost:8080/users/3/events/9999/comments",
+					"protocol": "http",
 					"host": [
-						"{{baseUrl}}"
+						"localhost"
 					],
+					"port": "8080",
 					"path": [
 						"users",
-						"{{uid}}",
+						"3",
 						"events",
 						"9999",
 						"comments"
