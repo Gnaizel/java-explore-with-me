@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.dto.category.CategoryDto;
-import ru.practicum.dto.comment.CommentShortDto;
+import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.enums.EventStat;
 import ru.practicum.model.Location;
@@ -43,5 +43,5 @@ public class EventFullDto {
     private String title;
     private Long views;
 
-    private List<CommentShortDto> comments;
+    private List<CommentDto> comments;
 }

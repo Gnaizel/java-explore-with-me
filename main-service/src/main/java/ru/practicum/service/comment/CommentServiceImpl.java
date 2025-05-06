@@ -3,14 +3,13 @@ package ru.practicum.service.comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.comment.CommentCreateDto;
-import ru.practicum.dto.comment.CommentShortDto;
+import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.exception.CommentNotExist;
 import ru.practicum.exception.CommentValidationError;
 import ru.practicum.exception.EventNotExistException;
 import ru.practicum.exception.UserNotExistException;
 import ru.practicum.mapper.CommentMapper;
 import ru.practicum.model.Comment;
-import ru.practicum.model.Event;
 import ru.practicum.model.User;
 import ru.practicum.repository.CommentRepository;
 import ru.practicum.repository.EventRepository;
@@ -26,26 +25,26 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
 
     @Override
-    public List<CommentShortDto> createComment(Long eventId, Long userId, CommentCreateDto commentCreateDto) {
+    public CommentDto createComment(Long eventId, Long userId, CommentCreateDto commentCreateDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistException("User not found"));
 
         Comment comment = Comment.builder()
                 .comment(commentCreateDto.getComment())
-                .event(eventId)
+                .event(eventRepository
+                        .findById(eventId)
+                        .orElseThrow(() -> new EventNotExistException("Event not found")))
                 .user(user)
                 .build();
-        commentRepository.save(comment);
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotExistException("Event not found"));
-        return event.getComments().stream().map(CommentMapper::toShortDto).toList();
+        return CommentMapper.toShortDto(commentRepository.save(comment));
     }
 
     @Override
-    public List<CommentShortDto> getCommentByEventId(Long eventId) {
-        return List.of();
+    public List<CommentDto> getCommentsByEventId(Long eventId) {
+        return commentRepository.findAllByEventId(eventId).stream().map(CommentMapper::toShortDto).toList();
     }
 
     @Override
-    public List<CommentShortDto> updateComment(Long userId, Long commentId, CommentCreateDto commentCreateDto) {
+    public CommentDto updateComment(Long userId, Long commentId, CommentCreateDto commentCreateDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistException("User not found"));
         Comment firstComment = commentRepository.findById(commentId).orElseThrow(() -> new CommentNotExist("Comment not found"));
 
@@ -56,15 +55,12 @@ public class CommentServiceImpl implements CommentService {
                 .user(user)
                 .build();
         if (firstComment.equals(comment)) throw new CommentValidationError("comment identical");
-        commentRepository.save(comment);
 
-        Event event = eventRepository.findById(comment.getEvent()).orElseThrow(() -> new EventNotExistException("Event not found"));
-
-        return event.getComments().stream().map(CommentMapper::toShortDto).toList();
+        return CommentMapper.toShortDto(commentRepository.save(comment));
     }
 
     @Override
-    public List<CommentShortDto> deleteComment(Long userId, Long commentId) {
+    public void deleteComment(Long userId, Long commentId) {
         Comment firstComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotExist("Comment not found"));
 
@@ -73,11 +69,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         commentRepository.deleteById(commentId);
-        Event event = eventRepository.findById(firstComment.getEvent())
+        eventRepository.findById(firstComment.getEvent().getId())
                 .orElseThrow(() -> new EventNotExistException("Event not found"));
-
-        return event.getComments().stream()
-                .map(CommentMapper::toShortDto)
-                .toList();
     }
 }

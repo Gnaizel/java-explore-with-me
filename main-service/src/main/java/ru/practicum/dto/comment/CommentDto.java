@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Builder
 @Data
-public class CommentShortDto {
+public class CommentDto {
     private String comment;
     private long author;
     private long id;
