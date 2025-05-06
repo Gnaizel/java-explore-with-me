@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.comment.CommentCreateDto;
+import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.event.EventCreateDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
@@ -13,6 +15,7 @@ import ru.practicum.dto.event.EventUpdateUserDto;
 import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.RequestStatusUpdateDto;
 import ru.practicum.dto.request.RequestStatusUpdateResult;
+import ru.practicum.service.comment.CommentService;
 import ru.practicum.service.event.EventService;
 import ru.practicum.service.request.RequestService;
 
@@ -28,6 +31,35 @@ public class AuthEventController {
     private final EventService eventService;
 
     private final RequestService requestService;
+    private final CommentService commentService;
+
+    @PostMapping("/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto createComment(@PathVariable Long eventId,
+                                    @PathVariable Long userId,
+                                    @Valid @RequestBody CommentCreateDto commentCreateDto) {
+        log.debug("comment create endpoint: \n userid: {} \n eventID: {} \n comment: {}", userId, eventId, commentCreateDto.toString());
+
+        return commentService.createComment(eventId, userId, commentCreateDto);
+    }
+
+    @PatchMapping("/comments/{commentId}")
+    public CommentDto updateComment(@PathVariable Long userId,
+                                    @PathVariable Long commentId,
+                                    @Valid @RequestBody CommentCreateDto commentCreateDto) {
+        log.debug("comment update endpoint: \n userid: {} \n \n comment: {}", userId, commentCreateDto.toString());
+
+        return commentService.updateComment(userId, commentId, commentCreateDto);
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PathVariable Long userId,
+                              @PathVariable Long commentId) {
+        log.debug("comment delete endpoint: \n userid: {}", userId);
+
+        commentService.deleteComment(userId, commentId);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

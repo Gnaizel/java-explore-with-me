@@ -3,8 +3,10 @@ package ru.practicum.controller.pub;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.enums.SortValue;
+import ru.practicum.service.comment.CommentService;
 import ru.practicum.service.event.EventService;
 
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.List;
 public class PublicEventsController {
 
     private final EventService eventService;
+    private final CommentService commentService;
 
     @GetMapping
     public List<EventFullDto> getEventsWithParamsByUser(@RequestParam(name = "text", required = false) String text,
@@ -28,6 +31,11 @@ public class PublicEventsController {
                                                         @RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
                                                         HttpServletRequest request) {
         return eventService.getEventsWithParamsByUser(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
+    }
+
+    @GetMapping("/{eventId}/comments")
+    public List<CommentDto> getCommentsByEventId(@PathVariable Long eventId) {
+        return commentService.getCommentsByEventId(eventId);
     }
 
     @GetMapping("/{id}")
