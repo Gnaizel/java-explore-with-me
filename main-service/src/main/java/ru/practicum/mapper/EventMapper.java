@@ -8,7 +8,9 @@ import ru.practicum.model.Event;
 import ru.practicum.repository.CategoryRepository;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -49,6 +51,11 @@ public class EventMapper {
         dto.setState(event.getState());
         dto.setTitle(event.getTitle());
         dto.setViews(event.getViews());
+        dto.setComments(Optional.ofNullable(event.getComments())
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .map(CommentMapper::toShortDto)
+                .toList());
         return dto;
     }
 

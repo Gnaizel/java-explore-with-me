@@ -10,6 +10,7 @@ import ru.practicum.enums.EventStat;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Entity
 @Data
@@ -49,4 +50,7 @@ public class Event {
     private EventStat state;
     private String title;
     private Long views;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 }
